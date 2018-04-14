@@ -45,11 +45,13 @@ class Node
         }
     };
     public:
-        Node(int id, vector<int> all_edges_distances)
-            : mId{id}, mTentativeDistance{std::numeric_limits<int>::max()}
+        Node(int id, vector<int> node_distances)
+            : mId{id}
+            , mTentativeDistance{std::numeric_limits<int>::max()}
+            , mVisited{false}
         {
             int toNode = 0;
-            for(const auto& distance : all_edges_distances)
+            for(const auto& distance : node_distances)
             {
                 mEdges.push_back({mId, toNode++, distance});
             }
@@ -60,14 +62,36 @@ class Node
         virtual int id(void){return mId;}
         virtual int tentative_distance(void){return mTentativeDistance;}
         virtual vector<Edge> all_edges(void){return mEdges;}
+        virtual bool has_been_visited(void){return mVisited;}
 
         // Setters
         virtual void set_tentative_distance(int dist){mTentativeDistance = dist;}
+        virtual void set_visited(void){mVisited = true;}
 
     private:
-        const int mId;
-        int mTentativeDistance;
-
+        const int    mId;
+        int          mTentativeDistance;
+        bool         mVisited;
         vector<Edge> mEdges;
+};
+
+class Graph
+{
+    typedef vector<vector<int>> connection_matrix_t;
+    public:
+        Graph(connection_matrix_t connection_matrix)
+        {
+            int id = 0;
+            for(const auto& line : connection_matrix)
+            {
+                mNodes.push_back({id++, line});
+            }
+        }
+
+        // Getter
+        virtual Node& get_node(int id){return mNodes.at(id);}
+
+    private:
+        vector<Node> mNodes;
 };
 
