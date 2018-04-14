@@ -1,7 +1,5 @@
 #include <gtest/gtest.h>
 #include "elements.hpp"
-#include <queue>
-#include <vector>
 
 TEST(Edge, 1_Edge_creation)
 {
@@ -67,10 +65,10 @@ TEST(Edge, 4_Sorting_priority_priority_queue)
 
 TEST(Node, 1_Node_s_edges_in_order_1)
 {
-    std::vector<int> distances {1,2,3,4,5};
+    vector<int> distances {1,2,3,4,5};
     Node node {0, distances };
 
-    std::vector<Edge> edges = node.all_edges();
+    vector<Edge> edges = node.all_edges();
 
     int i = 0;
     for(const auto& edge : edges)
@@ -81,11 +79,11 @@ TEST(Node, 1_Node_s_edges_in_order_1)
 
 TEST(Node, 2_Node_s_edges_in_order_2)
 {
-    std::vector<int> distances {5,4,3,2,1};
-    std::vector<int> test_order {1,2,3,4,5};
+    vector<int> distances {5,4,3,2,1};
+    vector<int> test_order {1,2,3,4,5};
 
     Node node {0, distances };
-    std::vector<Edge> edges = node.all_edges();
+    vector<Edge> edges = node.all_edges();
 
     int i = 0;
     for(const auto& edge : edges)
@@ -96,11 +94,11 @@ TEST(Node, 2_Node_s_edges_in_order_2)
 
 TEST(Node, 3_copy_const)
 {
-    std::vector<int> distances {5,4,3,2,1};
-    std::vector<int> test_order {1,2,3,4,5};
+    vector<int> distances {5,4,3,2,1};
+    vector<int> test_order {1,2,3,4,5};
     Node orig_node {0, distances };
     Node node {orig_node};
-    std::vector<Edge> edges = node.all_edges();
+    vector<Edge> edges = node.all_edges();
 
     int i = 0;
     for(const auto& edge : edges)
@@ -111,7 +109,7 @@ TEST(Node, 3_copy_const)
 
 TEST(Graph, 1_Grap_creation)
 {
-    std::vector<std::vector<int>> matrix {
+    vector<vector<int>> matrix {
         {1,2,3},
         {4,5,6},
         {7,8,9}
@@ -119,14 +117,14 @@ TEST(Graph, 1_Grap_creation)
     bool exception_caught {false};
     Graph   graph{matrix};
     Node node_1 = graph.get_node(0);
-    std::vector<Edge> edges_1 = node_1.all_edges();
-    std::vector<int> test_1 = {1,2,3};
+    vector<Edge> edges_1 = node_1.all_edges();
+    vector<int> test_1 = {1,2,3};
     Node node_2 = graph.get_node(1);
-    std::vector<Edge> edges_2 = node_2.all_edges();
-    std::vector<int> test_2 = {4,5,6};
+    vector<Edge> edges_2 = node_2.all_edges();
+    vector<int> test_2 = {4,5,6};
     Node node_3 = graph.get_node(2);
-    std::vector<Edge> edges_3 = node_3.all_edges();
-    std::vector<int> test_3 = {7,8,9};
+    vector<Edge> edges_3 = node_3.all_edges();
+    vector<int> test_3 = {7,8,9};
 
     try {
         Node node_4 = graph.get_node(4);
@@ -150,6 +148,53 @@ TEST(Graph, 1_Grap_creation)
         ASSERT_EQ(edge.distance(), test_3[i++]);
     }
     ASSERT_TRUE(exception_caught);
+}
+
+TEST(TESTING_IDEA, Ordered_set_verification)
+{
+    struct lesser 
+    {
+        bool operator()(const Node* lhs, const Node* rhs) {
+            return *lhs < *rhs ;
+        }
+    };
+    vector<vector<int>> matrix {
+        {1,2,3},
+        {4,5,6},
+        {7,8,9}
+    };
+    Graph   graph{matrix};
+
+    Node node_1 = graph.get_node(0);
+    node_1.set_tentative_distance(10);
+    Node node_2 = graph.get_node(1);
+    node_2.set_tentative_distance(15);
+    Node node_3 = graph.get_node(2);
+    node_3.set_tentative_distance(20);
+
+    vector<int> tentative_dist_test {10, 15, 20};
+    
+    int i;
+    vector<Node*> test_set;
+    test_set.push_back(&node_1);
+    test_set.push_back(&node_2);
+    test_set.push_back(&node_3);
+    std::sort(test_set.begin(), test_set.end(), lesser());
+    i = 0;
+    for(const auto& it : test_set)
+    {
+        ASSERT_EQ(it->tentative_distance(), tentative_dist_test[i++]);
+    }
+    tentative_dist_test = {9, 15, 25};
+    node_1.set_tentative_distance(25);
+    node_2.set_tentative_distance(15);
+    node_3.set_tentative_distance(9);
+    std::sort(test_set.begin(), test_set.end(), lesser());
+    i = 0;
+    for(const auto& it : test_set)
+    {
+        ASSERT_EQ(it->tentative_distance(), tentative_dist_test[i++]);
+    }
 }
 
 // ---------------------------------

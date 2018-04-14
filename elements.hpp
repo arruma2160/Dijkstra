@@ -1,6 +1,10 @@
 #include <vector>
 #include <algorithm>
+#include <queue>
+#include <set>
 using std::vector;
+using std::set;
+using std::priority_queue;
 
 class Edge 
 {
@@ -44,6 +48,7 @@ class Node
             return lhs > rhs ;
         }
     };
+
     public:
         Node(int id, vector<int> node_distances)
             : mId{id}
@@ -59,16 +64,24 @@ class Node
         }
 
         // Getters
-        virtual int id(void){return mId;}
-        virtual int tentative_distance(void){return mTentativeDistance;}
-        virtual vector<Edge> all_edges(void){return mEdges;}
-        virtual bool has_been_visited(void){return mVisited;}
+        virtual int id(void) const {return mId;}
+        virtual int tentative_distance(void) const {return mTentativeDistance;}
+        virtual vector<Edge> all_edges(void) const {return mEdges;}
+        virtual bool has_been_visited(void) const {return mVisited;}
 
         // Setters
         virtual void set_tentative_distance(int dist){mTentativeDistance = dist;}
         virtual void set_visited(void){mVisited = true;}
 
-    private:
+        friend bool operator< (const Node& lhs, const Node& rhs) {
+            return lhs.mTentativeDistance < rhs.mTentativeDistance;
+        }
+
+        friend bool operator> (const Node& lhs, const Node& rhs) {
+            return lhs.mTentativeDistance > rhs.mTentativeDistance;
+        }
+
+private:
         const int    mId;
         int          mTentativeDistance;
         bool         mVisited;
@@ -90,8 +103,75 @@ class Graph
 
         // Getter
         virtual Node& get_node(int id){return mNodes.at(id);}
+        virtual size_t size(void) const {return mNodes.size();}
 
     private:
         vector<Node> mNodes;
+};
+
+class Dijkstra
+{
+    struct lesser 
+    {
+        bool operator()(const Node* lhs, const Node* rhs) {
+            return *lhs < *rhs ;
+        }
+    };
+
+    public:
+        Dijkstra(Graph graph)
+            : mGraph{graph}
+        {
+            int graph_size = graph.size();
+            for(int i = 0 ; i < graph_size ; i++)
+            {
+                mUnvisited.push_back(&(mGraph.get_node(i)));
+            }
+        }
+
+
+        virtual void shortest_path(void) {
+
+        }
+
+
+    protected:
+        virtual void update_neighbours_node(int id) 
+        {
+            vector<Edge> edges = mGraph.get_node(id).all_edges();
+            for(const auto& edge : edges)
+            {
+                Node neighbour = mGraph.get_node(edge.toNode());
+                if(!neighbour.has_been_visited())
+                {
+                    int tentative = neighbour.tentative_distance() + edge.distance();
+                    if(tentative < neighbour.tentative_distance())
+                    {
+                        neighbour.set_tentative_distance(tentative);
+                    }
+                }
+            }
+            std::sort(mUnvisited.begin(), mUnvisited.end(), lesser());
+        }
+        
+        virtual void mark_node_as_visited(int id) 
+        {
+            mGraph.get_node(id).set_visited();
+            mUnvisited.erase(mUnvisited.begin());
+        }
+
+        virtual int get_id_next_node(void) 
+        {
+            int node_id = -1;
+            if(!mUnvisited.empty())
+            {
+                node_id = mUnvisited[0]->id();
+            }
+            return node_id;
+        }
+
+    private:
+        Graph         mGraph;
+        vector<Node*> mUnvisited;
 };
 
