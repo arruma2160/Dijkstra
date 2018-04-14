@@ -15,6 +15,6 @@ tests:
 	@cd ./test;\
 	mkdir -p test_build;\
 	cd test_build;\
-	cmake .. && make && ./dijkstra_tests
+	cmake .. && make && ./test
 	
 .PHONY: tests
