@@ -128,7 +128,7 @@ TEST(Graph, 1_Grap_creation)
 
     try {
         Node node_4 = graph.get_node(4);
-    } catch (std::out_of_range) {
+    } catch (std::logic_error) {
         exception_caught = true;
     }
 
@@ -225,7 +225,6 @@ TEST(Dijkstra_and_Operations, 1_dijkstra_sets_vector_unvisited_nodes)
     int start_id = 0;
     int end_id = 2;
     Dijkstra dijkstra {graph, start_id, end_id};
-    dijkstra.mark_all_nodes_unvisited();
     
     const vector<int> unvisited {dijkstra.unvisited_nodes()};
     ASSERT_EQ(unvisited.size(), 3);
@@ -243,6 +242,86 @@ TEST(Dijkstra_and_Operations, 1_dijkstra_sets_vector_unvisited_nodes)
     ASSERT_FALSE(node_2.visited());
 }
 
+TEST(Dijkstra_and_Operations, 2_set_start_method)
+{
+    vector<vector<int>> matrix {
+        {1,2,3},
+        {4,5,6},
+        {7,8,9}
+    };
+    Graph   graph{matrix};
+    int start_id = 0;
+    int end_id = 2;
+    Dijkstra dijkstra {graph, start_id, end_id};
+    dijkstra.set_start();
+    Node& node_start = dijkstra.get_node(start_id);
+    ASSERT_EQ(node_start.tentative_distance(), 0);
+    ASSERT_EQ(node_start.parent(), node_start.id());
+    ASSERT_EQ(dijkstra.graph_size(), 3);
+}
+
+TEST(Dijkstra_and_Operations, 3_mark_as_visited)
+{
+    vector<vector<int>> matrix {
+        {1,2,3},
+        {4,5,6},
+        {7,8,9}
+    };
+    Graph   graph{matrix};
+    int start_id = 0;
+    int end_id = 2;
+    Dijkstra dijkstra {graph, start_id, end_id};
+    
+    vector<int> unvisited {dijkstra.unvisited_nodes()};
+    ASSERT_EQ(unvisited.size(), 3);
+    dijkstra.mark_visited(2);
+    unvisited = dijkstra.unvisited_nodes();
+    ASSERT_EQ(unvisited.size(), 2);
+    dijkstra.mark_visited(1);
+    unvisited = dijkstra.unvisited_nodes();
+    ASSERT_EQ(unvisited.size(),1);
+    dijkstra.mark_visited(0);
+    unvisited = dijkstra.unvisited_nodes();
+    ASSERT_EQ(unvisited.size(),0);
+}
+
+TEST(Dijkstra_and_Operations, 4_next_node_id)
+{
+    vector<vector<int>> matrix {
+        {1,2,3},
+        {4,5,6},
+        {7,8,9}
+    };
+    Graph   graph{matrix};
+    int start_id = 0;
+    int end_id = 2;
+    Dijkstra dijkstra {graph, start_id, end_id};
+
+    Node& node_0 = dijkstra.get_node(0);
+    Node& node_1 = dijkstra.get_node(1);
+    Node& node_2 = dijkstra.get_node(2);
+
+    node_0.set_tentative_distance(10);
+    node_1.set_tentative_distance(20);
+    node_2.set_tentative_distance(30);
+
+    ASSERT_EQ(node_0.tentative_distance(), 10);
+    ASSERT_EQ(node_1.tentative_distance(), 20);
+    ASSERT_EQ(node_2.tentative_distance(), 30);
+
+    int next_id = dijkstra.next_node_id();
+    ASSERT_EQ(next_id, 0);
+    dijkstra.mark_visited(next_id);
+
+    next_id = dijkstra.next_node_id();
+    ASSERT_EQ(next_id, 1);
+    dijkstra.mark_visited(next_id);
+
+    next_id = dijkstra.next_node_id();
+    ASSERT_EQ(next_id, 2);
+    dijkstra.mark_visited(next_id);
+}
+      
 
 // ---------------------------------
 // Main 

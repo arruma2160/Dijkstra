@@ -3,10 +3,8 @@ CC = g++
 INCLUDE =
 LIBS = 
 
-all: tests
-
-#main.o: main.cpp
-#	$(CC) $(CFLAG) -c main.cpp
+main: elements.hpp main.cpp tests
+	$(CC) $(CFLAG) main.cpp -o main
 
 clean:
 	rm -rf *.o ./test/test_build

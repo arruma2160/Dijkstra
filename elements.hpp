@@ -4,6 +4,8 @@
 #include <set>
 #include <limits>
 #include <stack>
+#include <stdexcept>
+#include <string>
 using std::vector;
 using std::set;
 using std::priority_queue;
@@ -58,6 +60,7 @@ class Node
             : mId{id}
             , mTentativeDistance{std::numeric_limits<int>::max()}
             , mVisited{false}
+            , mParent{std::numeric_limits<int>::max()}
         {
             int toNode = 0;
             for(const auto& distance : node_distances)
@@ -123,7 +126,15 @@ class Graph
         }
 
         // Getter
-        virtual Node& get_node(int id){return mNodes.at(id);}
+        virtual Node& get_node(int id) {
+            try {
+                return mNodes.at(id);
+            } catch(std::out_of_range)
+            {
+                std::string msg = "Node '" + std::to_string(id) + "' NOT in graph";
+                throw std::logic_error(msg);
+            }
+        }
         virtual size_t size(void) const {return mNodes.size();}
 
     private:
@@ -142,11 +153,12 @@ class Dijkstra
     public:
         Dijkstra(Graph& graph, int start_node_id, int end_node_id)
             : mGraph{graph}, mStartId{start_node_id}, mEndId{end_node_id}
-        {}
+        {
+           mark_all_nodes_unvisited(); 
+        }
 
         virtual stack<int> solve_shortest_path() 
         {
-           mark_all_nodes_unvisited(); 
            set_start();
            int current_node_id = mStartId;
            while(!finished())
@@ -158,10 +170,10 @@ class Dijkstra
            return get_solution();
         }
 
-        virtual int mark_all_nodes_unvisited(void)
+        virtual void mark_all_nodes_unvisited(void)
         {
             size_t sz = mGraph.size();
-            for(int i = 0 ; i < sz ; i++)
+            for(unsigned i = 0 ; i < sz ; i++)
             {
                 Node& node{mGraph.get_node(i)};
                 mUnvisited.push_back(&node);
@@ -170,7 +182,7 @@ class Dijkstra
             std::sort(mUnvisited.begin(), mUnvisited.end(), lesser());
         }
 
-        virtual int set_start(void)
+        virtual void set_start(void)
         {
             Node& start = mGraph.get_node(mStartId);
             start.set_tentative_distance(0);
@@ -179,13 +191,14 @@ class Dijkstra
 
         virtual void update_neighbours(int id) 
         {
-            vector<Edge> edges = mGraph.get_node(id).all_edges();
+            Node& node = mGraph.get_node(id);
+            vector<Edge> edges = node.all_edges();
             for(const auto& edge : edges)
             {
-                Node neighbour = mGraph.get_node(edge.toNode());
-                if(!neighbour.visited())
+                Node& neighbour = mGraph.get_node(edge.toNode());
+                if(!neighbour.visited() && edge.distance())
                 {
-                    int tentative = neighbour.tentative_distance() + edge.distance();
+                    int tentative = node.tentative_distance() + edge.distance();
                     if(tentative < neighbour.tentative_distance())
                     {
                         neighbour.set_tentative_distance(tentative);
@@ -193,7 +206,6 @@ class Dijkstra
                     }
                 }
             }
-            std::sort(mUnvisited.begin(), mUnvisited.end(), lesser());
         }
 
         virtual void mark_visited(int id) 
@@ -205,6 +217,7 @@ class Dijkstra
         virtual int next_node_id(void) 
         {
             int node_id = -1;
+            std::sort(mUnvisited.begin(), mUnvisited.end(), lesser());
             if(!mUnvisited.empty())
             {
                 node_id = mUnvisited[0]->id();
@@ -253,9 +266,9 @@ class Dijkstra
 
 
     private:
+        Graph&        mGraph;
         int           mStartId;
         int           mEndId;
-        Graph&        mGraph;
         vector<Node*> mUnvisited;
 };
 
