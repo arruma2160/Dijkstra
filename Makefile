@@ -7,7 +7,7 @@ main: elements.hpp main.cpp tests
 	$(CC) $(CFLAG) main.cpp -o main
 
 clean:
-	rm -rf *.o ./test/test_build
+	rm -rf *.o ./test/test_build main
 
 tests: 
 	@cd ./test;\

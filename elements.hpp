@@ -26,8 +26,6 @@ class Edge
 
         // Setters
         virtual void set_distance(int distance){mDistance = distance;}
-        virtual void set_from_node(int fromNode) = delete;
-        virtual void set_to_node(int toNode) = delete;
 
         friend bool operator< (const Edge& lhs, const Edge& rhs) {
             // Definition of less than relation between two edges:
@@ -118,6 +116,11 @@ class Graph
     public:
         Graph(connection_matrix_t connection_matrix)
         {
+            if(connection_matrix.size() != connection_matrix[0].size())
+            {
+                throw std::logic_error("wrong connection matrix dimmensions");
+            }
+
             int id = 0;
             for(const auto& line : connection_matrix)
             {
@@ -168,18 +171,6 @@ class Dijkstra
                current_node_id = next_node_id();
            }
            return get_solution();
-        }
-
-        virtual void mark_all_nodes_unvisited(void)
-        {
-            size_t sz = mGraph.size();
-            for(unsigned i = 0 ; i < sz ; i++)
-            {
-                Node& node{mGraph.get_node(i)};
-                mUnvisited.push_back(&node);
-                node.set_unvisited();
-            }
-            std::sort(mUnvisited.begin(), mUnvisited.end(), lesser());
         }
 
         virtual void set_start(void)
@@ -264,6 +255,18 @@ class Dijkstra
 
         virtual size_t graph_size(void){return mGraph.size();}
 
+    protected:
+        virtual void mark_all_nodes_unvisited(void)
+        {
+            size_t sz = mGraph.size();
+            for(unsigned i = 0 ; i < sz ; i++)
+            {
+                Node& node{mGraph.get_node(i)};
+                mUnvisited.push_back(&node);
+                node.set_unvisited();
+            }
+            std::sort(mUnvisited.begin(), mUnvisited.end(), lesser());
+        }
 
     private:
         Graph&        mGraph;

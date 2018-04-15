@@ -150,6 +150,29 @@ TEST(Graph, 1_Grap_creation)
     ASSERT_TRUE(exception_caught);
 }
 
+TEST(Graph, 2_Wrong_connection_dimensions_exception)
+{
+    bool exception_caught {false};
+    vector<vector<int>> matrix {
+       //  0,  1,  2,  3,  4,  5,  6,  7
+        {  0,  3,  2,  5,  0,  0,  0,  0}, //0
+        {  3,  0,  0,  0,  3,  0,  0,  0}, //1
+        {  2,  0,  0,  0,  1,  6,  0,  0}, //2
+        {  5,  0,  0,  2,  0,  0,  0,  0}, //3
+        {  3,  0,  1,  0,  0,  0,  4,  0}, //4
+        {  0,  0,  0,  0,  0,  4,  2,  0}  //5
+    };
+
+    try {
+        Graph graph{matrix};
+    } catch (std::logic_error) {
+        exception_caught = true;
+    }
+    ASSERT_TRUE(exception_caught);
+}
+      
+
+
 TEST(TESTING_IDEA, Ordered_set_verification)
 {
     struct lesser 
@@ -331,12 +354,12 @@ TEST(Dijkstra_and_Operations, 5_Trying_real_graph)
     result.push(0);
 
     vector<vector<int>> matrix {
-        {0,10,20, 0, 0,0},
-        {0, 0, 0,50,10,0},
-        {0, 0, 0,20,33,0},
-        {0, 0, 0, 0,20,2},
-        {0, 0, 0, 0, 0,1},
-        {0, 0, 0, 0, 0,0},
+        {0, 10, 20,  0,  0, 0},
+        {0,  0,  0, 50, 10, 0},
+        {0,  0,  0, 20, 33, 0},
+        {0,  0,  0,  0, 20, 2},
+        {0,  0,  0,  0,  0, 1},
+        {0,  0,  0,  0,  0, 0},
     };
     Graph   graph{matrix};
     int start_id = 0;
@@ -346,7 +369,6 @@ TEST(Dijkstra_and_Operations, 5_Trying_real_graph)
 
     ASSERT_EQ(solution, result);
 }
-      
 
 // ---------------------------------
 // Main 
