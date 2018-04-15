@@ -214,6 +214,36 @@ TEST(TESTING_IDEA, Ordered_set_verification)
     ASSERT_EQ(it->tentative_distance(), 25);
 }
 
+TEST(Dijkstra_and_Operations, 1_dijkstra_sets_vector_unvisited_nodes)
+{
+    vector<vector<int>> matrix {
+        {1,2,3},
+        {4,5,6},
+        {7,8,9}
+    };
+    Graph   graph{matrix};
+    int start_id = 0;
+    int end_id = 2;
+    Dijkstra dijkstra {graph, start_id, end_id};
+    dijkstra.mark_all_nodes_unvisited();
+    
+    const vector<int> unvisited {dijkstra.unvisited_nodes()};
+    ASSERT_EQ(unvisited.size(), 3);
+    ASSERT_EQ(unvisited[0], 0);
+    ASSERT_EQ(unvisited[1], 1);
+    ASSERT_EQ(unvisited[2], 2);
+
+    ASSERT_EQ(dijkstra.graph_size(), 3);
+    Node& node_0 = dijkstra.get_node(0);
+    Node node_1 = dijkstra.get_node(1);
+    Node node_2 = dijkstra.get_node(2);
+
+    ASSERT_FALSE(node_0.visited());
+    ASSERT_FALSE(node_1.visited());
+    ASSERT_FALSE(node_2.visited());
+}
+
+
 // ---------------------------------
 // Main 
 int main(int argc, char **argv) {
