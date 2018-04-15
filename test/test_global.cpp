@@ -321,6 +321,31 @@ TEST(Dijkstra_and_Operations, 4_next_node_id)
     ASSERT_EQ(next_id, 2);
     dijkstra.mark_visited(next_id);
 }
+
+TEST(Dijkstra_and_Operations, 5_Trying_real_graph)
+{
+    stack<int> result;
+    result.push(5);
+    result.push(4);
+    result.push(1);
+    result.push(0);
+
+    vector<vector<int>> matrix {
+        {0,10,20, 0, 0,0},
+        {0, 0, 0,50,10,0},
+        {0, 0, 0,20,33,0},
+        {0, 0, 0, 0,20,2},
+        {0, 0, 0, 0, 0,1},
+        {0, 0, 0, 0, 0,0},
+    };
+    Graph   graph{matrix};
+    int start_id = 0;
+    int end_id = 5;
+    Dijkstra dijkstra {graph, start_id, end_id};
+    stack<int> solution = dijkstra.solve_shortest_path();
+
+    ASSERT_EQ(solution, result);
+}
       
 
 // ---------------------------------
