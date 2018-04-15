@@ -2,9 +2,11 @@
 #include <algorithm>
 #include <queue>
 #include <set>
+#include <limits>
 using std::vector;
 using std::set;
 using std::priority_queue;
+using std::numeric_limits;
 
 class Edge 
 {
@@ -66,12 +68,14 @@ class Node
         // Getters
         virtual int id(void) const {return mId;}
         virtual int tentative_distance(void) const {return mTentativeDistance;}
+        virtual int parent(void) const {return mParent;}
         virtual vector<Edge> all_edges(void) const {return mEdges;}
         virtual bool has_been_visited(void) const {return mVisited;}
 
         // Setters
         virtual void set_tentative_distance(int dist){mTentativeDistance = dist;}
         virtual void set_visited(void){mVisited = true;}
+        virtual void set_parent(int parent){mParent = parent;}
 
         friend bool operator< (const Node& lhs, const Node& rhs) {
             return lhs.mTentativeDistance < rhs.mTentativeDistance;
@@ -86,6 +90,7 @@ private:
         int          mTentativeDistance;
         bool         mVisited;
         vector<Edge> mEdges;
+        int          mParent;
 };
 
 class Graph
@@ -119,24 +124,41 @@ class Dijkstra
     };
 
     public:
-        Dijkstra(Graph graph)
-            : mGraph{graph}
+        Dijkstra(Graph graph, int start_node_id, int end_node_id)
+            : mGraph{graph}, mStartId{start_node_id}, mEndId{end_node_id}
+        {}
+
+        virtual void shortest_path() 
         {
-            int graph_size = graph.size();
-            for(int i = 0 ; i < graph_size ; i++)
+           mark_all_nodes_unvisited(); 
+           set_zero_tentative_dist_starting_node();
+           int current_node_id = mStartId;
+           while(!finished())
+           {
+               update_neighbours(current_node_id);
+               mark_visited(current_node_id);
+               current_node_id = next_node_id();
+           }
+        }
+
+
+        virtual int mark_all_nodes_unvisited(void)
+        {
+            size_t sz = mGraph.size();
+            for(int i = 0 ; i < sz ; i++)
             {
                 mUnvisited.push_back(&(mGraph.get_node(i)));
             }
+            std::sort(mUnvisited.begin(), mUnvisited.end(), lesser());
         }
 
-
-        virtual void shortest_path(void) {
-
+        virtual int set_zero_tentative_dist_starting_node(void)
+        {
+            Node& start = mGraph.get_node(mStartId);
+            start.set_tentative_distance(0);
         }
 
-
-    protected:
-        virtual void update_neighbours_node(int id) 
+        virtual void update_neighbours(int id) 
         {
             vector<Edge> edges = mGraph.get_node(id).all_edges();
             for(const auto& edge : edges)
@@ -148,19 +170,20 @@ class Dijkstra
                     if(tentative < neighbour.tentative_distance())
                     {
                         neighbour.set_tentative_distance(tentative);
+                        neighbour.set_parent(id);
                     }
                 }
             }
             std::sort(mUnvisited.begin(), mUnvisited.end(), lesser());
         }
-        
-        virtual void mark_node_as_visited(int id) 
+
+        virtual void mark_visited(int id) 
         {
             mGraph.get_node(id).set_visited();
             mUnvisited.erase(mUnvisited.begin());
         }
 
-        virtual int get_id_next_node(void) 
+        virtual int next_node_id(void) 
         {
             int node_id = -1;
             if(!mUnvisited.empty())
@@ -170,7 +193,28 @@ class Dijkstra
             return node_id;
         }
 
+        virtual bool finished(void)
+        {
+            static Node& ending = mGraph.get_node(mEndId);
+            if(ending.has_been_visited())
+            {
+                return true;
+            }
+            if(mUnvisited[0]->tentative_distance() == numeric_limits<int>::max())
+            {
+                return true;
+            }
+            return false;
+        }
+
+        virtual vector<int> retrieve_result(void)
+        {
+            //TODO
+        }
+
     private:
+        int           mStartId;
+        int           mEndId;
         Graph         mGraph;
         vector<Node*> mUnvisited;
 };

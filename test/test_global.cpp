@@ -158,6 +158,7 @@ TEST(TESTING_IDEA, Ordered_set_verification)
             return *lhs < *rhs ;
         }
     };
+
     vector<vector<int>> matrix {
         {1,2,3},
         {4,5,6},
@@ -172,29 +173,45 @@ TEST(TESTING_IDEA, Ordered_set_verification)
     Node node_3 = graph.get_node(2);
     node_3.set_tentative_distance(20);
 
-    vector<int> tentative_dist_test {10, 15, 20};
     
     int i;
     vector<Node*> test_set;
+
     test_set.push_back(&node_1);
     test_set.push_back(&node_2);
     test_set.push_back(&node_3);
     std::sort(test_set.begin(), test_set.end(), lesser());
+
     i = 0;
+    vector<int> tentative_dist_test {10, 15, 20};
     for(const auto& it : test_set)
     {
         ASSERT_EQ(it->tentative_distance(), tentative_dist_test[i++]);
     }
-    tentative_dist_test = {9, 15, 25};
+
     node_1.set_tentative_distance(25);
     node_2.set_tentative_distance(15);
     node_3.set_tentative_distance(9);
     std::sort(test_set.begin(), test_set.end(), lesser());
+
     i = 0;
+    tentative_dist_test = {9, 15, 25};
     for(const auto& it : test_set)
     {
         ASSERT_EQ(it->tentative_distance(), tentative_dist_test[i++]);
     }
+
+    test_set.erase(test_set.begin());
+    i = 0;
+    tentative_dist_test = {15, 25};
+    for(const auto& it : test_set)
+    {
+        ASSERT_EQ(it->tentative_distance(), tentative_dist_test[i++]);
+    }
+
+    test_set.erase(test_set.begin());
+    Node* it = test_set[0];
+    ASSERT_EQ(it->tentative_distance(), 25);
 }
 
 // ---------------------------------
