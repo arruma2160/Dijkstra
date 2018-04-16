@@ -232,15 +232,21 @@ class Dijkstra
 
         virtual stack<int> get_solution(void)
         {
-            stack<int>    solution;
+            stack<int>    sol;
             Node& node = mGraph.get_node(mEndId);
+            if(node.parent() == std::numeric_limits<int>::max())
+            {
+                // Ending node not reached -> solution: no path
+                // between 'start' and 'end'
+                return sol;
+            }
             while(node.id() != mStartId)
             {
-                solution.push(node.id());
+                sol.push(node.id());
                 node = mGraph.get_node(node.parent());
             }
-            solution.push(mStartId);
-            return solution;
+            sol.push(mStartId);
+            return sol;
         }
 
         virtual Node& get_node(int id) const { return mGraph.get_node(id);}

@@ -20,14 +20,20 @@ int main(void)
     Dijkstra dijkstra {graph, start_id, end_id};
     stack<int> solution = dijkstra.solve_shortest_path();
 
-    int id;
-    while(!solution.empty())
-    {
-        id = solution.top(); 
-        solution.pop();
-        std::cerr << id << " "; 
+    if(solution.empty()) { 
+        std::cerr << "NO solution for this graph" << std::endl;
     }
-    std::cerr << std::endl;
+    else
+    {
+        int id;
+        while(!solution.empty())
+        {
+            id = solution.top(); 
+            solution.pop();
+            std::cerr << id << " "; 
+        }
+        std::cerr << std::endl;
+    }
 
     return 0;
 }
